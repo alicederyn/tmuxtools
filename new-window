@@ -1,0 +1,30 @@
+#!/bin/bash
+# To use, put something like this in your .tmux.conf:
+#     bind M-0 command-prompt -p Repository: 'run "~/bin/tmux-new-window.sh %1 0"'
+ 
+PROJECT=$1
+WINDOW=$2
+ 
+PROJECT_DIR=~/$PROJECT
+for DIR in $HOME /Volumes/git ; do
+  if [ -d "$DIR/$PROJECT" ]; then
+    PROJECT_DIR=$DIR/$PROJECT
+  fi
+done
+
+cd $PROJECT_DIR
+tmux new-window ${WINDOW:+-t$WINDOW} -n $PROJECT
+if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
+  tmux splitw -d  # Ensure kill-pane doesn't kill pane 0 (weird bug in -a)
+  tmux kill-pane -a -t 0
+  tmux splitw -d
+  tmux splitw -d "git graph-branch --watch"
+  
+  #tmux splitw -d "watch -t --color \"git status -sbu | sed -e 's/\\(.\\{8\\}\\).\\{4,\\}\\(.\\{'\\\"\\\$((\\\$COLUMNS-11))\\\"'\\}\\)/\\1...\\2/' -e 's/\\/\\([^\\/]\\+\\.[^\\/]\\+\\)$/\\/'\$'\\x1b''[33m\\1'\$'\\x1b''[0m/' -e 's/## \\(.*\\)\\.\\.\\..*/  '\$'\\x1b''[1;33mOn branch \\1'\$'\\x1b''[0m/'\""
+  #tmux splitw -d "watch -t --color \"git status -sbu | sed -Ee ':s' -e '/.{'\\\"\\\$((\\\$COLUMNS>=200?200:\\\$COLUMNS+1))\\\"'}/ s,([^ /])[aeiouy][^ /]*/,\1/,' -e 't s' -e 's,/([^/]+[.][^/]+)$,/'\$'\\x1b''[33m\\1'\$'\\x1b''[0m,' -e 's/## (.*)\\.\\.\\..*/  '\$'\\x1b''[1;33mOn branch \\1'\$'\\x1b''[0m/'\""
+  tmux splitw -d "watch -t --color \"git status -sbu | sed -Ee ':s' -e '/.{'\\\"\\\$((\\\$COLUMNS>=200?200:\\\$COLUMNS+1))\\\"'}/ s,^(...)....[^/-]*([/-]),\1...\2,' -e 't s' -e 's,/([^/]+[.][^/]+)$,/'\$'\\x1b''[33m\\1'\$'\\x1b''[0m,' -e 's/## (.*)\\.\\.\\..*/  '\$'\\x1b''[1;33mOn branch \\1'\$'\\x1b''[0m/'\""
+else
+  tmux split-window -hd
+fi
+~/bin/tmuxtools/chrislayout
+

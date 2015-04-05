@@ -1,0 +1,3 @@
+#!/bin/bash
+source /etc/profile
+(tmux ls | grep -vq attached && exec -l tmux at) || exec -l tmux
