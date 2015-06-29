@@ -13,7 +13,21 @@ import os, sh
 from collections import namedtuple
 from sh import tmux
  
-Pane = namedtuple('Pane', 'id index width height active start_command')
+class Pane(object):
+  _fields = ('id', 'index', 'width', 'height', 'active', 'start_command')
+
+  def __init__(self, id, index, width, height, active, start_command):
+    self.id = id
+    self.index = index
+    self.width = width
+    self.height = height
+    self.active = active
+    self.start_command = start_command
+
+  @property
+  def is_interactive(self):
+    return not self.start_command or self.start_command.startswith('reattach-to-user-namespace -l')
+
 def getPanes():
   format = ','.join('#{pane_%s}' % field for field in Pane._fields)
   for line in tmux.lsp(F=format):
@@ -40,13 +54,13 @@ panes.sort(key=lambda p : int(p.index))
 activePane = [p for p in panes if p.active == '1'][0]
  
 nPanes = len(panes)
-nUtility = sum(1 for p in panes if p.start_command)
+nUtility = sum(1 for p in panes if not p.is_interactive)
 nMain = nPanes - nUtility
  
 groups = []
 ids = []
 for p in panes:
-  if p.start_command:
+  if not p.is_interactive:
     if not groups or not isinstance(groups[-1], list):
       groups.append([])
       ids.append([])

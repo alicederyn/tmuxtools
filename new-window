@@ -6,7 +6,7 @@ PROJECT=$1
 WINDOW=$2
  
 PROJECT_DIR=~/$PROJECT
-for DIR in $HOME /Volumes/git ; do
+for DIR in $HOME /Volumes/git $HOME/bin  ; do
   if [ -d "$DIR/$PROJECT" ]; then
     PROJECT_DIR=$DIR/$PROJECT
   fi
