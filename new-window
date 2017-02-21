@@ -21,8 +21,14 @@ if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
   tmux splitw -d "git graph-branch --watch"
   tmux splitw -d $HOME/bin/gittools/watch-status
 
+  ~/bin/tmuxtools/chrislayout
+
+  tmux respawn-pane -kt 0
+  tmux clear-history -t 0
+  tmux respawn-pane -kt 3
+  tmux clear-history -t 3
+
 else
   tmux split-window -hd
+  ~/bin/tmuxtools/chrislayout
 fi
-~/bin/tmuxtools/chrislayout
-
