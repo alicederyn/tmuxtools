@@ -18,7 +18,7 @@ if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
   tmux splitw -d  # Ensure kill-pane doesn't kill pane 0 (weird bug in -a)
   tmux kill-pane -a -t 0
   tmux splitw -d
-  tmux splitw -d "git graph-branch --watch"
+  tmux splitw -d "source ~/.profile ; git graph-branch --watch"
   tmux splitw -d $HOME/bin/gittools/watch-status
 
   ~/bin/tmuxtools/chrislayout
