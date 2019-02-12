@@ -13,22 +13,11 @@ for DIR in $HOME /Volumes/git $HOME/bin  ; do
 done
 
 cd $PROJECT_DIR
-tmux new-window ${WINDOW:+-t$WINDOW} -n $PROJECT
+tmux new-window ${WINDOW:+-t$WINDOW} -n $PROJECT "echo Spawning... && sleep 100"
+tmux splitw -dhb -l 100
+tmux splitw -dh -l 100
 if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
-  tmux splitw -d  # Ensure kill-pane doesn't kill pane 0 (weird bug in -a)
-  tmux kill-pane -a -t 0
-  tmux splitw -d
-  tmux splitw -d "source ~/.profile ; git graph-branch --watch"
-  tmux splitw -d $HOME/bin/gittools/watch-status
-
-  ~/bin/tmuxtools/chrislayout
-
-  tmux respawn-pane -kt 0
-  tmux clear-history -t 0
-  tmux respawn-pane -kt 3
-  tmux clear-history -t 3
-
-else
-  tmux split-window -hd
-  ~/bin/tmuxtools/chrislayout
+  tmux splitw -dv -p 50 "source ~/.profile ; git graph-branch --watch"
+  tmux splitw -dv -p 40 $HOME/bin/gittools/watch-status
 fi
+tmux kill-pane -t 1
