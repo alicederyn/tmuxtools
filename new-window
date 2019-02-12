@@ -20,4 +20,7 @@ if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
   tmux splitw -dv -p 50 "source ~/.profile ; git graph-branch --watch"
   tmux splitw -dv -p 40 $HOME/bin/gittools/watch-status
 fi
+if [ -d "$PROJECT_DIR/.docker" ]; then
+  tmux splitw -dv -p 50 "/usr/local/bin/docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\""
+fi
 tmux kill-pane -t 1
