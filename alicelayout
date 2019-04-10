@@ -88,13 +88,12 @@ if __name__ == '__main__':
   mainPanes = [pane for pane in allPanes if pane.is_interactive]
   utilityPanes = [pane for pane in allPanes if not pane.is_interactive]
 
-  mainColumns = max((windowWidth - (60 if utilityPanes else 0)) // 101, 1)
-
+  mainColumns = min(len(mainPanes), max((windowWidth - (60 if utilityPanes else 0)) // 101, 1))
   panesByColumn = partition(mainPanes, mainColumns)
   if utilityPanes:
     panesByColumn.insert(1, utilityPanes)
 
-  reorderPanes([p for column in panesByColumn for p in column])
+    reorderPanes([p for column in panesByColumn for p in column])
 
   formatComponents = []
   x = 0
