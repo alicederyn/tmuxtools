@@ -55,13 +55,13 @@ def layoutChecksum(l):
 
 def partition(l, n):
   """Partition l into n partitions of approximately equal size."""
-  return [l[i*len(l)//n:(i+1)*len(l)//n] for i in xrange(n)]
+  return [l[i*len(l)//n:(i+1)*len(l)//n] for i in range(n)]
 
 def reorderPanes(orderedPanes):
   """Reorders panes in tmux to match the given order."""
   activePane = [p for p in orderedPanes if p.active][0]
   currentOrder = sorted(orderedPanes, key=lambda p : p.index)
-  for i in xrange(len(orderedPanes)):
+  for i in range(len(orderedPanes)):
     current = currentOrder[i]
     desired = orderedPanes[i]
     if current != desired:
@@ -74,7 +74,7 @@ def reorderPanes(orderedPanes):
       current.index = swapIndex
   activePane.activate()
    
-if __name__ == '__main__':
+def alicelayout():
   windowHeight, windowWidth = getWindowSize()
 
   if windowWidth < 161:
