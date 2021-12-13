@@ -7,8 +7,10 @@ WINDOW=$2
 
 COLS=$(tmux display -p '#{window_width}')
 
+USER_PROJECT_DIRS=$(bash --login -c "echo \${USER_PROJECT_DIRS:-$HOME $HOME/bin $HOME/code}")
+
 PROJECT_DIR=~/$PROJECT
-for DIR in $HOME $HOME/bin $HOME/code ; do
+for DIR in ${USER_PROJECT_DIRS} ; do
   if [ -d "$DIR/$PROJECT" ]; then
     PROJECT_DIR=$DIR/$PROJECT
   fi
