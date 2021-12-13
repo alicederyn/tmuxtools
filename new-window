@@ -26,7 +26,7 @@ if [ $COLS -gt 261 ]; then
 fi
 
 # Display utility panes if there's enough room
-if [ $COLS -gt 160 ]; then
+if [[ ( $COLS -gt 160 ) && ! ( "$PROJECT_DIR" == /mnt/* ) ]]; then
   if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
     tmux splitw -dv -p 50 "source ~/.profile ; git graph-branch --watch"
     tmux splitw -dv -p 40 "source ~/.profile ; git watch-status"
