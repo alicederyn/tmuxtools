@@ -16,13 +16,22 @@ for DIR in ${USER_PROJECT_DIRS} ; do
   fi
 done
 
+CMD=""
+if [ -f "$PROJECT_DIR/.tmuxtools.toml" ]; then
+  # Don't worry too much about toml format yet
+  CMD=$(grep -o '^shell = ".*"$' "$PROJECT_DIR/.tmuxtools.toml" | sed -e 's/^shell = "\(.*\)"$/\1/')
+  if [[ -n "$CMD" ]]; then
+    CMD="bash -l -c $(printf "%q" "$CMD")"
+  fi
+fi
+
 cd $PROJECT_DIR
 tmux new-window ${WINDOW:+-t$WINDOW} -n $PROJECT "echo Spawning... && sleep 100"
-tmux splitw -dhb -l 100
+tmux splitw -dhb -l 100 ${CMD:+"$CMD"}
 
 # Display second shell pane if there's enough room
 if [ $COLS -gt 261 ]; then
-  tmux splitw -dh -l 100
+  tmux splitw -dh -l 100 ${CMD:+"$CMD"}
 fi
 
 # Display utility panes if there's enough room

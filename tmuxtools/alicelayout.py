@@ -30,7 +30,7 @@ class Pane(object):
 
   @property
   def is_interactive(self):
-    return not self.start_command or self.start_command.startswith('reattach-to-user-namespace -l')
+    return not self.start_command or '-l' in self.start_command.split()
 
   def activate(self):
     tmux.selectp(t=self.id)
