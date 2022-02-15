@@ -1,7 +1,10 @@
 #!/bin/bash
 # To use, put something like this in your .tmux.conf:
 #     bind M-0 command-prompt -p Repository: 'run "~/bin/tmux-new-window.sh %1 0"'
- 
+
+
+### Determine configuration ####################################################
+
 PROJECT=$1
 WINDOW=$2
 
@@ -16,32 +19,75 @@ for DIR in ${USER_PROJECT_DIRS} ; do
   fi
 done
 
-CMD=""
-if [ -f "$PROJECT_DIR/.tmuxtools.toml" ]; then
-  # Don't worry too much about toml format yet
-  CMD=$(grep -o '^shell = ".*"$' "$PROJECT_DIR/.tmuxtools.toml" | sed -e 's/^shell = "\(.*\)"$/\1/')
-  if [[ -n "$CMD" ]]; then
-    CMD="bash -l -c $(printf "%q" "$CMD")"
+function option { # option OPTION_NAME [DEFAULT]
+  VALUE=""
+  if [ -f "$PROJECT_DIR/.tmuxtools.toml" ]; then
+    # Don't worry too much about toml format yet
+    VALUE=$(grep -o "^$1 *= *.*$" "$PROJECT_DIR/.tmuxtools.toml" 2> /dev/null | sed -e "s/^$1 = \\(.*\\)\$/\\1/" | sed -e "s/^\"\\(.*\\)\"\$/\\1/")
+  fi
+  echo ${VALUE:-$2}
+}
+
+# Determine shell command
+CMD=$(option "shell")
+if [[ -n "$CMD" ]]; then
+  CMD="bash -l -c $(printf "%q" "$CMD")"
+fi
+
+# Add utility panes if there's enough room
+UTILITY_PANES=()
+UTILITY_COLUMNS=0
+if [[ $COLS -gt 160 ]]; then
+  if [ -d "$PROJECT_DIR/.docker" ] && ! [[ "$PROJECT_DIR" == /mnt/* ]]; then
+    UTILITY_PANES+=( "/usr/local/bin/docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\"" )
+  fi
+  if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
+    UTILITY_PANES+=( "git watch-status" "git graph-branch --watch" )
+  fi
+
+  if [ ${#UTILITY_PANES[@]} -eq 0 ]; then
+    UTILITY_COLUMNS=1
   fi
 fi
+
+# Determine number of shell columns and panes to display
+# Each shell column takes 100 characters; the utility column takes 60;
+# and there is a 1-character divider between each
+SHELL_COLUMNS=$(( ($COLS + 1 - ($UTILITY_COLUMNS * 61)) / 101 ))
+if [ $SHELL_COLUMNS -lt 1 ]; then
+  SHELL_COLUMNS=1  # Always have at least one, no matter how small the window
+fi
+SHELL_PANES=$(option "shell_panes" $SHELL_COLUMNS)
+if [ $SHELL_PANES -lt $SHELL_COLUMNS ]; then
+  SHELL_PANES=$SHELL_COLUMNS
+fi
+
+
+### Create new window ##########################################################
 
 cd $PROJECT_DIR
-tmux new-window ${WINDOW:+-t$WINDOW} -n $PROJECT "echo Spawning... && sleep 100"
-tmux splitw -dhb -l 100 ${CMD:+"$CMD"}
+TEMP_PANE_ID=$(tmux new-window -PF "#{pane_id}" ${WINDOW:+-t$WINDOW} -n $PROJECT "echo Spawning... && sleep 100")
 
-# Display second shell pane if there's enough room
-if [ $COLS -gt 261 ]; then
-  tmux splitw -dh -l 100 ${CMD:+"$CMD"}
-fi
+# Display shell panes
+PANE_IDS=()
+for (( idx=0 ; idx<$SHELL_PANES ; idx++ )); do
+  if [ $idx == 0 ] || [ $idx -lt $(( $SHELL_COLUMNS - 1 )) ]; then
+    # Spawn a new pane to the left
+    TMUX_ARGS="-dhb -l 100"
+  elif [ $idx -eq $(( $SHELL_COLUMNS - 1 )) ]; then
+    # Spawn a new pane to the right
+    TMUX_ARGS="-dh -l 100"
+  else
+    # Spawn a new pane below the top pane in the column
+    PARENT_ID=$(( $idx % $SHELL_COLUMNS ))
+    TMUX_ARGS="-dv -t ${PANE_IDS[$PARENT_ID]}"
+  fi
+  PANE_ID=$(tmux splitw -PF "#{pane_id}" $TMUX_ARGS ${CMD:+"$CMD"})
+  PANE_IDS+=( $PANE_ID )
+done
 
 # Display utility panes if there's enough room
-if [[ ( $COLS -gt 160 ) && ! ( "$PROJECT_DIR" == /mnt/* ) ]]; then
-  if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
-    tmux splitw -dv -p 50 "source ~/.profile ; git graph-branch --watch"
-    tmux splitw -dv -p 40 "source ~/.profile ; git watch-status"
-  fi
-  if [ -d "$PROJECT_DIR/.docker" ]; then
-    tmux splitw -dv -p 50 "/usr/local/bin/docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\""
-  fi
-fi
-tmux kill-pane -t 1
+for (( idx=${#UTILITY_PANES[@]}-1 ; idx >= 0 ; idx-- )); do
+  tmux splitw -dv -p 50 "source ~/.profile ; ${UTILITY_PANES[idx]}"
+done
+tmux kill-pane -t $TEMP_PANE_ID
