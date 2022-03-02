@@ -38,11 +38,13 @@ fi
 UTILITY_PANES=()
 UTILITY_COLUMNS=0
 if [[ $COLS -gt 160 ]]; then
-  if [ -d "$PROJECT_DIR/.docker" ] && ! [[ "$PROJECT_DIR" == /mnt/* ]]; then
-    UTILITY_PANES+=( "/usr/local/bin/docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\"" )
-  fi
-  if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
-    UTILITY_PANES+=( "git watch-status" "git graph-branch --watch" )
+  if ! [[ "$PROJECT_DIR" == /mnt/* ]]; then
+    if [ -d "$PROJECT_DIR/.docker" ]; then
+      UTILITY_PANES+=( "/usr/local/bin/docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\"" )
+    fi
+    if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
+      UTILITY_PANES+=( "git watch-status" "git graph-branch --watch" )
+    fi
   fi
 
   if [ ${#UTILITY_PANES[@]} -eq 0 ]; then
