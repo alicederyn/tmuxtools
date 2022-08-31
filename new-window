@@ -56,7 +56,7 @@ fi
 REMOTE=$(option "remote")
 if [[ -n "$REMOTE" ]]; then
   REMOTE_DIR=${PROJECT_DIR/$HOME/\$HOME}
-  CMD="devssh $REMOTE -t 'cd $REMOTE_DIR && ${CMD:-bash -l} '"
+  CMD="devssh -q $REMOTE -t 'cd $REMOTE_DIR && ${CMD:-bash -l} '"
   for i in "${!UTILITY_PANES[@]}"; do
     UTILITY_PANES[$i]="devssh $REMOTE -t 'cd $REMOTE_DIR && ${UTILITY_PANES[$i]} '"
   done
