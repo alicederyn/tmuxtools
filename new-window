@@ -58,7 +58,7 @@ if [[ -n "$REMOTE" ]]; then
   REMOTE_DIR=${PROJECT_DIR/$HOME/\$HOME}
   CMD="ssh -q $REMOTE -t 'cd $REMOTE_DIR && ${CMD:-bash -l} '"
   for i in "${!UTILITY_PANES[@]}"; do
-    UTILITY_PANES[$i]="ssh $REMOTE -t \"bash -ilc 'cd $REMOTE_DIR && ${UTILITY_PANES[$i]} '\""
+    UTILITY_PANES[$i]="ssh -q $REMOTE -t \"bash -ilc 'cd $REMOTE_DIR && ${UTILITY_PANES[$i]} '\""
   done
 fi
 
