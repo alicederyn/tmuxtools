@@ -3,5 +3,5 @@ WINDOW=$1
 if tmux list-windows -F '#{window_index}' | grep -q "^${WINDOW}\$" ; then
   tmux select-window -t $WINDOW
 else
-  tmux command-prompt -p 'Repository:' "run '~/bin/tmuxtools/new-window %1 $WINDOW'"
+  tmux command-prompt -p 'Repository:' "run '~/tools/tmuxtools/new-window %1 $WINDOW'"
 fi

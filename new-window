@@ -1,6 +1,6 @@
 #!/bin/bash
 # To use, put something like this in your .tmux.conf:
-#     bind M-0 command-prompt -p Repository: 'run "~/bin/tmux-new-window.sh %1 0"'
+#     bind M-0 command-prompt -p Repository: 'run "~/tools/tmux-new-window.sh %1 0"'
 
 
 ### Determine configuration ####################################################
@@ -10,7 +10,7 @@ WINDOW=$2
 
 COLS=$(tmux display -p '#{window_width}')
 
-USER_PROJECT_DIRS=$(bash --login -c "echo \${USER_PROJECT_DIRS:-$HOME $HOME/bin $HOME/code}")
+USER_PROJECT_DIRS=$(bash --login -c "echo \${USER_PROJECT_DIRS:-$HOME $HOME/tools $HOME/code}")
 
 PROJECT_DIR=~/$PROJECT
 for DIR in ${USER_PROJECT_DIRS} ; do
