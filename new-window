@@ -47,7 +47,7 @@ if [[ $COLS -gt 160 ]]; then
     fi
   fi
 
-  if [ ${#UTILITY_PANES[@]} -eq 0 ]; then
+  if [ ${#UTILITY_PANES[@]} -ne 0 ]; then
     UTILITY_COLUMNS=1
   fi
 fi
