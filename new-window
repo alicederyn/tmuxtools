@@ -90,6 +90,6 @@ done
 
 # Display utility panes if there's enough room
 for (( idx=${#UTILITY_PANES[@]}-1 ; idx >= 0 ; idx-- )); do
-  tmux splitw -dv -p 50 "source ~/.profile ; ${UTILITY_PANES[idx]}"
+  tmux splitw -dv -l '50%' "source ~/.profile ; ${UTILITY_PANES[idx]}"
 done
 tmux kill-pane -t $TEMP_PANE_ID
