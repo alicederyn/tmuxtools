@@ -42,7 +42,7 @@ if [[ $COLS -gt 160 ]]; then
     if [ -d "$PROJECT_DIR/.docker" ]; then
       UTILITY_PANES+=( "/usr/local/bin/docker stats --format \"table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\"" )
     fi
-    if [ -d "$PROJECT_DIR/.git" -o -d "$PROJECT_DIR/../.git" ]; then
+    if [ -e "$PROJECT_DIR/.git" -o -e "$PROJECT_DIR/../.git" ]; then
       UTILITY_PANES+=( "git watch-status" "git graph-branch --watch" )
     fi
   fi
